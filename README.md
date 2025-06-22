@@ -106,6 +106,7 @@ A modern, accessible, and feature-rich web application that converts PDF files t
 
 ### Dependencies
 - **PDF.js**: For PDF parsing and rendering
+- **pdf-lib**: For editing, rearranging, and combining PDFs
 - **No build tools required**: Pure HTML, CSS, and JavaScript
 
 ### Browser Support
@@ -194,4 +195,8 @@ If you encounter any issues or have questions:
 
 ---
 
-**Note**: This application processes PDFs entirely in your browser. No data is sent to any server, ensuring complete privacy and security of your documents. 
+**Note**: This application processes PDFs entirely in your browser. No data is sent to any server, ensuring complete privacy and security of your documents.
+
+## Upcoming Features
+- Rearranging PDF pages (drag-and-drop)
+- Combining PDFs and images into a single PDF 

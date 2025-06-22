@@ -71,6 +71,11 @@ class PDFToImageConverter {
         // Theme toggle
         this.themeToggle.addEventListener('click', () => this.toggleTheme());
         
+        // Navigation tabs
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', (e) => this.switchMode(e.target.dataset.mode));
+        });
+        
         // Quality change with debouncing
         let qualityChangeTimeout;
         this.qualitySelect.addEventListener('change', () => {
@@ -659,6 +664,36 @@ class PDFToImageConverter {
     updateThemeIcon(theme) {
         this.themeToggleIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
     }
+    
+    switchMode(mode) {
+        // Update tab states
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.mode === mode);
+        });
+        
+        // Show/hide sections
+        const convertSection = document.getElementById('convertSection');
+        const editSection = document.getElementById('editSection');
+        const combineSection = document.getElementById('combineSection');
+        
+        convertSection.classList.toggle('hidden', mode !== 'convert');
+        if (editSection) editSection.classList.toggle('hidden', mode !== 'edit');
+        if (combineSection) combineSection.classList.toggle('hidden', mode !== 'combine');
+        
+        // Update header description based on mode
+        const headerDescription = document.querySelector('.header__description');
+        switch (mode) {
+            case 'convert':
+                headerDescription.textContent = 'Convert your PDF files to high-quality PNG images. Simply upload your PDF and download individual pages or all at once.';
+                break;
+            case 'edit':
+                headerDescription.textContent = 'Rearrange PDF pages with drag-and-drop. Upload a PDF, reorder the pages, and export the rearranged document.';
+                break;
+            case 'combine':
+                headerDescription.textContent = 'Combine multiple PDFs and images into a single PDF. Upload files, arrange them in order, and export the combined document.';
+                break;
+        }
+    }
 }
 
 // Initialize the app when DOM is loaded
@@ -671,4 +706,274 @@ document.addEventListener('DOMContentLoaded', () => {
     
     console.log('Initializing PDF Converter');
     window.pdfConverter = new PDFToImageConverter();
+    
+    // Initialize PDF Editor and Combiner
+    window.pdfEditor = new PDFEditor();
+    window.pdfCombiner = new PDFCombiner();
 });
+
+// Add: PDF Edit Mode UI and logic
+class PDFEditor {
+    constructor() {
+        this.pdfDoc = null;
+        this.pages = [];
+        this.pageOrder = [];
+        this.thumbnails = [];
+        this.initUI();
+    }
+
+    initUI() {
+        // Create edit section inside the main container
+        const editSection = document.createElement('div');
+        editSection.className = 'mode-section hidden';
+        editSection.id = 'editSection';
+        editSection.innerHTML = `
+            <section class="edit-section">
+                <h2>Edit PDF: Rearrange Pages</h2>
+                <input type="file" id="editPdfInput" accept=".pdf,application/pdf">
+                <div class="edit-thumbnails" id="editThumbnails"></div>
+                <button class="btn btn--primary" id="exportEditedPdfBtn" disabled>Export Rearranged PDF</button>
+            </section>
+        `;
+        
+        // Insert after convert section
+        const convertSection = document.getElementById('convertSection');
+        convertSection.parentNode.insertBefore(editSection, convertSection.nextSibling);
+        
+        this.editPdfInput = editSection.querySelector('#editPdfInput');
+        this.editThumbnails = editSection.querySelector('#editThumbnails');
+        this.exportBtn = editSection.querySelector('#exportEditedPdfBtn');
+        this.editPdfInput.addEventListener('change', (e) => this.handleFile(e.target.files[0]));
+        this.exportBtn.addEventListener('click', () => this.exportPdf());
+    }
+
+    async handleFile(file) {
+        if (!file) return;
+        const arrayBuffer = await file.arrayBuffer();
+        this.pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+        this.pages = this.pdfDoc.getPages();
+        this.pageOrder = this.pages.map((_, i) => i);
+        this.renderThumbnails();
+        this.exportBtn.disabled = false;
+    }
+
+    renderThumbnails() {
+        this.editThumbnails.innerHTML = '';
+        this.pageOrder.forEach((pageIdx, i) => {
+            const thumb = document.createElement('div');
+            thumb.className = 'edit-thumbnail';
+            thumb.draggable = true;
+            thumb.dataset.idx = i;
+            thumb.textContent = `Page ${pageIdx + 1}`;
+            thumb.addEventListener('dragstart', (e) => this.onDragStart(e, i));
+            thumb.addEventListener('dragover', (e) => e.preventDefault());
+            thumb.addEventListener('drop', (e) => this.onDrop(e, i));
+            this.editThumbnails.appendChild(thumb);
+        });
+    }
+
+    onDragStart(e, idx) {
+        e.dataTransfer.setData('text/plain', idx);
+    }
+
+    onDrop(e, idx) {
+        const fromIdx = parseInt(e.dataTransfer.getData('text/plain'), 10);
+        if (fromIdx === idx) return;
+        // Rearrange pageOrder
+        const moved = this.pageOrder.splice(fromIdx, 1)[0];
+        this.pageOrder.splice(idx, 0, moved);
+        this.renderThumbnails();
+    }
+
+    async exportPdf() {
+        if (!this.pdfDoc || this.pageOrder.length === 0) return;
+        
+        try {
+            this.exportBtn.disabled = true;
+            this.exportBtn.textContent = 'Exporting...';
+            
+            const newPdfDoc = await PDFLib.PDFDocument.create();
+            
+            // Copy pages in the new order
+            for (const pageIdx of this.pageOrder) {
+                const [copiedPage] = await newPdfDoc.copyPages(this.pdfDoc, [pageIdx]);
+                newPdfDoc.addPage(copiedPage);
+            }
+            
+            const pdfBytes = await newPdfDoc.save();
+            
+            // Create download link
+            const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'rearranged-pdf.pdf';
+            link.click();
+            URL.revokeObjectURL(url);
+            
+            this.exportBtn.textContent = 'Export Rearranged PDF';
+            this.exportBtn.disabled = false;
+            
+        } catch (error) {
+            console.error('Export failed:', error);
+            this.exportBtn.textContent = 'Export Failed';
+            setTimeout(() => {
+                this.exportBtn.textContent = 'Export Rearranged PDF';
+                this.exportBtn.disabled = false;
+            }, 2000);
+        }
+    }
+}
+
+// Add: PDF Combiner for merging PDFs and images
+class PDFCombiner {
+    constructor() {
+        this.files = [];
+        this.thumbnails = [];
+        this.initUI();
+    }
+
+    initUI() {
+        // Create combine section inside the main container
+        const combineSection = document.createElement('div');
+        combineSection.className = 'mode-section hidden';
+        combineSection.id = 'combineSection';
+        combineSection.innerHTML = `
+            <section class="combine-section">
+                <h2>Combine PDFs & Images</h2>
+                <input type="file" id="combineFilesInput" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/*" multiple>
+                <div class="combine-thumbnails" id="combineThumbnails"></div>
+                <button class="btn btn--primary" id="exportCombinedPdfBtn" disabled>Export Combined PDF</button>
+            </section>
+        `;
+        
+        // Insert after edit section
+        const editSection = document.getElementById('editSection');
+        if (editSection) {
+            editSection.parentNode.insertBefore(combineSection, editSection.nextSibling);
+        } else {
+            const convertSection = document.getElementById('convertSection');
+            convertSection.parentNode.insertBefore(combineSection, convertSection.nextSibling);
+        }
+        
+        this.combineFilesInput = combineSection.querySelector('#combineFilesInput');
+        this.combineThumbnails = combineSection.querySelector('#combineThumbnails');
+        this.exportBtn = combineSection.querySelector('#exportCombinedPdfBtn');
+        this.combineFilesInput.addEventListener('change', (e) => this.handleFiles(e.target.files));
+        this.exportBtn.addEventListener('click', () => this.exportCombinedPdf());
+    }
+
+    async handleFiles(fileList) {
+        this.files = Array.from(fileList);
+        this.renderThumbnails();
+        this.exportBtn.disabled = this.files.length === 0;
+    }
+
+    renderThumbnails() {
+        this.combineThumbnails.innerHTML = '';
+        this.files.forEach((file, i) => {
+            const thumb = document.createElement('div');
+            thumb.className = 'combine-thumbnail';
+            thumb.draggable = true;
+            thumb.dataset.idx = i;
+            
+            if (file.type === 'application/pdf') {
+                thumb.textContent = `PDF: ${file.name}`;
+                thumb.style.backgroundColor = '#e3f2fd';
+            } else {
+                thumb.textContent = `Image: ${file.name}`;
+                thumb.style.backgroundColor = '#f3e5f5';
+            }
+            
+            thumb.addEventListener('dragstart', (e) => this.onDragStart(e, i));
+            thumb.addEventListener('dragover', (e) => e.preventDefault());
+            thumb.addEventListener('drop', (e) => this.onDrop(e, i));
+            
+            const removeBtn = document.createElement('button');
+            removeBtn.textContent = '×';
+            removeBtn.className = 'remove-file-btn';
+            removeBtn.onclick = () => this.removeFile(i);
+            thumb.appendChild(removeBtn);
+            
+            this.combineThumbnails.appendChild(thumb);
+        });
+    }
+
+    removeFile(idx) {
+        this.files.splice(idx, 1);
+        this.renderThumbnails();
+        this.exportBtn.disabled = this.files.length === 0;
+    }
+
+    onDragStart(e, idx) {
+        e.dataTransfer.setData('text/plain', idx);
+    }
+
+    onDrop(e, idx) {
+        const fromIdx = parseInt(e.dataTransfer.getData('text/plain'), 10);
+        if (fromIdx === idx) return;
+        
+        const moved = this.files.splice(fromIdx, 1)[0];
+        this.files.splice(idx, 0, moved);
+        this.renderThumbnails();
+    }
+
+    async exportCombinedPdf() {
+        if (this.files.length === 0) return;
+        
+        try {
+            this.exportBtn.disabled = true;
+            this.exportBtn.textContent = 'Combining...';
+            
+            const newPdfDoc = await PDFLib.PDFDocument.create();
+            
+            for (const file of this.files) {
+                if (file.type === 'application/pdf') {
+                    // Handle PDF files
+                    const arrayBuffer = await file.arrayBuffer();
+                    const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+                    const pages = await newPdfDoc.copyPages(pdfDoc, pdfDoc.getPageIndices());
+                    pages.forEach(page => newPdfDoc.addPage(page));
+                } else {
+                    // Handle image files
+                    const arrayBuffer = await file.arrayBuffer();
+                    let image;
+                    
+                    if (file.type.startsWith('image/jpeg') || file.type.startsWith('image/jpg')) {
+                        image = await newPdfDoc.embedJpg(arrayBuffer);
+                    } else if (file.type.startsWith('image/png')) {
+                        image = await newPdfDoc.embedPng(arrayBuffer);
+                    } else {
+                        console.warn('Unsupported image type:', file.type);
+                        continue;
+                    }
+                    
+                    const page = newPdfDoc.addPage([image.width, image.height]);
+                    page.drawImage(image, { x: 0, y: 0 });
+                }
+            }
+            
+            const pdfBytes = await newPdfDoc.save();
+            
+            // Create download link
+            const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'combined-pdf.pdf';
+            link.click();
+            URL.revokeObjectURL(url);
+            
+            this.exportBtn.textContent = 'Export Combined PDF';
+            this.exportBtn.disabled = false;
+            
+        } catch (error) {
+            console.error('Combine failed:', error);
+            this.exportBtn.textContent = 'Combine Failed';
+            setTimeout(() => {
+                this.exportBtn.textContent = 'Export Combined PDF';
+                this.exportBtn.disabled = false;
+            }, 2000);
+        }
+    }
+}

@@ -1283,3 +1283,182 @@ select.form-control {
 [data-color-scheme="light"] .theme-toggle__icon {
   content: "🌙";
 }
+
+.edit-section {
+  margin: 2rem auto;
+  max-width: 700px;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-24);
+}
+
+.edit-section h2 {
+  margin-bottom: var(--space-16);
+}
+
+.edit-thumbnails {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-16);
+  margin: var(--space-16) 0;
+  min-height: 80px;
+}
+
+.edit-thumbnail {
+  width: 80px;
+  height: 110px;
+  background: var(--color-secondary);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  cursor: grab;
+  user-select: none;
+  transition: box-shadow 0.2s;
+}
+
+.edit-thumbnail:active {
+  cursor: grabbing;
+  box-shadow: 0 0 0 2px var(--color-primary);
+}
+
+.edit-thumbnail.drag-over {
+  border-color: var(--color-primary);
+  background: var(--color-primary-hover);
+  color: #fff;
+}
+
+#exportEditedPdfBtn {
+  margin-top: var(--space-16);
+}
+
+.combine-section {
+  margin: 2rem auto;
+  max-width: 700px;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-24);
+}
+
+.combine-section h2 {
+  margin-bottom: var(--space-16);
+}
+
+.combine-thumbnails {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-16);
+  margin: var(--space-16) 0;
+  min-height: 80px;
+}
+
+.combine-thumbnail {
+  width: 120px;
+  height: 80px;
+  background: var(--color-secondary);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  cursor: grab;
+  user-select: none;
+  transition: box-shadow 0.2s;
+  position: relative;
+  text-align: center;
+  padding: var(--space-8);
+  word-break: break-word;
+}
+
+.combine-thumbnail:active {
+  cursor: grabbing;
+  box-shadow: 0 0 0 2px var(--color-primary);
+}
+
+.combine-thumbnail.drag-over {
+  border-color: var(--color-primary);
+  background: var(--color-primary-hover);
+  color: #fff;
+}
+
+.remove-file-btn {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-error);
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.remove-file-btn:hover {
+  background: var(--color-error);
+  transform: scale(1.1);
+}
+
+#exportCombinedPdfBtn {
+  margin-top: var(--space-16);
+}
+
+/* Navigation Tabs */
+.nav-tabs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--space-24);
+  border-bottom: 1px solid var(--color-border);
+  padding: 0 var(--space-16);
+}
+
+.nav-tab {
+  background: none;
+  border: none;
+  padding: var(--space-12) var(--space-20);
+  margin: 0 var(--space-4);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all var(--duration-normal) var(--ease-standard);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+}
+
+.nav-tab:hover {
+  color: var(--color-text);
+  background: var(--color-secondary);
+  border-radius: var(--radius-base) var(--radius-base) 0 0;
+}
+
+.nav-tab.active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.nav-tab:focus-visible {
+  outline: var(--focus-outline);
+  box-shadow: var(--focus-ring);
+}
+
+/* Mode Sections */
+.mode-section {
+  display: block;
+}
+
+.mode-section.hidden {
+  display: none;
+}
