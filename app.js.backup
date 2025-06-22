@@ -708,8 +708,8 @@ document.addEventListener('DOMContentLoaded', () => {
     window.pdfConverter = new PDFToImageConverter();
     
     // Initialize PDF Editor and Combiner
-    try { window.pdfEditor = new PDFEditor(); } catch (error) { console.error("PDFEditor failed:", error); }
-    try { window.pdfCombiner = new PDFCombiner(); } catch (error) { console.error("PDFCombiner failed:", error); }
+    window.pdfEditor = new PDFEditor();
+    window.pdfCombiner = new PDFCombiner();
 });
 
 // Add: PDF Edit Mode UI and logic
@@ -976,5 +976,4 @@ class PDFCombiner {
             }, 2000);
         }
     }
-}// Fallback: ensure basic functionality works even if new features fail
-window.addEventListener("error", (e) => { console.error("Global error caught:", e.error); });
+}
