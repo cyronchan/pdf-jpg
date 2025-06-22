@@ -1,4 +1,3 @@
-
 :root {
   /* Colors */
   --color-background: rgba(252, 252, 249, 1);
@@ -1052,4 +1051,235 @@ select.form-control {
 [data-color-scheme="dark"] .upload-zone:hover,
 [data-color-scheme="dark"] .upload-zone.drag-over {
   background: rgba(var(--color-success-rgb), 0.1);
+}
+
+/* Modal styles */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.modal.show {
+  opacity: 1;
+}
+
+.modal-content {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: hidden;
+  border: 1px solid var(--color-card-border);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-16) var(--space-20);
+  border-bottom: 1px solid var(--color-card-border-inner);
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: var(--color-text);
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: var(--font-size-2xl);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: var(--space-4);
+  border-radius: var(--radius-base);
+  transition: all var(--duration-normal) var(--ease-standard);
+}
+
+.modal-close:hover {
+  background-color: var(--color-secondary);
+  color: var(--color-text);
+}
+
+.modal-close:focus-visible {
+  outline: var(--focus-outline);
+  box-shadow: var(--focus-ring);
+}
+
+.modal-body {
+  padding: var(--space-20);
+  overflow-y: auto;
+  max-height: calc(90vh - 80px);
+}
+
+/* Thumbnail size info */
+.thumbnail-size {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-8);
+}
+
+/* Drag over state */
+.upload-zone.drag-over {
+  border-color: var(--color-primary);
+  background-color: rgba(var(--color-primary-rgb), 0.05);
+  transform: scale(1.02);
+}
+
+/* Improved focus states */
+.btn:focus-visible,
+.form-control:focus-visible,
+.upload-zone:focus-visible {
+  outline: var(--focus-outline);
+  box-shadow: var(--focus-ring);
+}
+
+/* Loading state for buttons */
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Success message animation */
+.status--success {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* Improved thumbnail gallery layout */
+.thumbnail-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-16);
+  margin-top: var(--space-16);
+}
+
+@media (max-width: 768px) {
+  .thumbnail-gallery {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: var(--space-12);
+  }
+  
+  .modal-content {
+    margin: var(--space-16);
+    max-width: calc(100vw - 32px);
+    max-height: calc(100vh - 32px);
+  }
+  
+  .modal-header {
+    padding: var(--space-12) var(--space-16);
+  }
+  
+  .modal-body {
+    padding: var(--space-16);
+  }
+}
+
+/* Accessibility improvements */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .btn {
+    border-width: 2px;
+  }
+  
+  .form-control {
+    border-width: 2px;
+  }
+  
+  .card {
+    border-width: 2px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .fade-in {
+    animation: none;
+  }
+  
+  .upload-zone.drag-over {
+    transform: none;
+  }
+}
+
+/* Header improvements */
+.header__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-16);
+}
+
+/* Theme toggle button */
+.theme-toggle {
+  background: var(--color-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-standard);
+  font-size: var(--font-size-lg);
+}
+
+.theme-toggle:hover {
+  background: var(--color-secondary-hover);
+  transform: scale(1.05);
+}
+
+.theme-toggle:focus-visible {
+  outline: var(--focus-outline);
+  box-shadow: var(--focus-ring);
+}
+
+.theme-toggle__icon {
+  transition: transform var(--duration-normal) var(--ease-standard);
+}
+
+.theme-toggle:hover .theme-toggle__icon {
+  transform: rotate(15deg);
+}
+
+/* Dark mode theme toggle */
+[data-color-scheme="dark"] .theme-toggle__icon {
+  content: "☀️";
+}
+
+[data-color-scheme="light"] .theme-toggle__icon {
+  content: "🌙";
 }

@@ -1,0 +1,44 @@
+{
+  "name": "pdf-to-image-converter",
+  "version": "2.0.0",
+  "description": "A modern, accessible web application that converts PDF files to high-quality PNG images directly in your browser",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "serve": "npx http-server -p 8000 -o",
+    "dev": "npx live-server --port=8000 --open=/"
+  },
+  "keywords": [
+    "pdf",
+    "converter",
+    "image",
+    "png",
+    "browser",
+    "client-side",
+    "accessibility",
+    "vanilla-javascript",
+    "pdf.js"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/pdf-to-image-converter.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/pdf-to-image-converter/issues"
+  },
+  "homepage": "https://github.com/yourusername/pdf-to-image-converter#readme",
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "live-server": "^1.2.2"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+} 
