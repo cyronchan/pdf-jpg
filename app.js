@@ -976,5 +976,4 @@ class PDFCombiner {
             }, 2000);
         }
     }
-}// Fallback: ensure basic functionality works even if new features fail
-window.addEventListener("error", (e) => { console.error("Global error caught:", e.error); });
+}

@@ -6,72 +6,111 @@
     <title>PDF to Image Converter</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 </head>
 <body>
     <div class="container">
+        <!-- Navigation Tabs -->
+        <nav class="nav-tabs">
+            <button class="nav-tab active" data-mode="convert">Convert to Images</button>
+            <button class="nav-tab" data-mode="edit">Edit PDF</button>
+            <button class="nav-tab" data-mode="combine">Combine PDFs</button>
+        </nav>
+
+        <!-- Header -->
         <header class="header">
-            <h1>PDF to Image Converter</h1>
-            <p>Convert your PDF files to high-quality PNG images.</p>
+            <div class="header__top">
+                <h1>PDF to Image Converter</h1>
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+                    <span class="theme-toggle__icon">🌙</span>
+                </button>
+            </div>
+            <p class="header__description">Convert your PDF files to high-quality PNG images. Simply upload your PDF and download individual pages or all at once.</p>
         </header>
 
-        <section class="upload-section" id="uploadSection">
-            <div class="upload-zone" id="uploadZone">
-                <div class="upload-zone__content">
-                    <div class="upload-zone__icon">📄</div>
-                    <h3>Drag your PDF here to start converting</h3>
-                    <p>or</p>
-                    <button class="btn btn--primary" id="browseBtn">Browse Files</button>
-                    <input type="file" id="fileInput" accept=".pdf,application/pdf" hidden>
+        <!-- Convert to Images Section -->
+        <div class="mode-section" id="convertSection">
+            <!-- Upload Section -->
+            <section class="upload-section" id="uploadSection">
+                <div class="upload-zone" id="uploadZone">
+                    <div class="upload-zone__content">
+                        <div class="upload-zone__icon">📄</div>
+                        <h3>Drag your PDF here to start converting</h3>
+                        <p>or</p>
+                        <button class="btn btn--primary" id="browseBtn">Browse Files</button>
+                        <input type="file" id="fileInput" accept=".pdf,application/pdf" hidden>
+                    </div>
+                    <div class="upload-zone__info">
+                        <p>Maximum file size: 50MB • Supported format: PDF</p>
+                    </div>
+                </div>
+
+                <!-- Quality Settings -->
+                <div class="quality-settings">
+                    <label class="form-label" for="qualitySelect">Image Quality:</label>
+                    <select class="form-control" id="qualitySelect">
+                        <option value="150">Standard (150 DPI)</option>
+                        <option value="300">High (300 DPI)</option>
+                        <option value="75">Low (75 DPI)</option>
+                    </select>
+                </div>
+            </section>
+
+            <!-- Progress Section -->
+            <section class="progress-section hidden" id="progressSection">
+                <div class="card">
+                    <div class="card__body">
+                        <h3>Converting PDF...</h3>
+                        <div class="progress-bar">
+                            <div class="progress-bar__fill" id="progressFill"></div>
+                        </div>
+                        <p class="progress-text" id="progressText">Preparing conversion...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section hidden" id="resultsSection">
+                <div class="results-header">
+                    <h3>Converted Images</h3>
+                    <div class="results-actions">
+                        <button class="btn btn--primary" id="downloadAllBtn">Download All</button>
+                        <button class="btn btn--secondary" id="convertAnotherBtn">Convert Another PDF</button>
+                    </div>
+                </div>
+                
+                <div class="thumbnail-gallery" id="thumbnailGallery">
+                    <!-- Thumbnails will be inserted here -->
+                </div>
+            </section>
+
+            <!-- Error Section -->
+            <section class="error-section hidden" id="errorSection">
+                <div class="card">
+                    <div class="card__body">
+                        <div class="status status--error">
+                            <span id="errorMessage">An error occurred during conversion.</span>
+                        </div>
+                        <button class="btn btn--secondary mt-8" id="retryBtn">Try Again</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer__content">
+                <p>Convert PDF pages to PNG images with customizable quality settings. All processing is done locally in your browser for privacy and security.</p>
+                <div class="footer__features">
+                    <span class="status status--info">Drag & Drop Upload</span>
+                    <span class="status status--info">Progress Tracking</span>
+                    <span class="status status--info">Batch Download</span>
+                    <span class="status status--info">Quality Settings</span>
                 </div>
             </div>
-        </section>
-
-        <div class="thumbnail-gallery" id="thumbnailGallery"></div>
+        </footer>
     </div>
 
-    <script>
-        // Simple working version
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-        
-        document.getElementById('browseBtn').addEventListener('click', () => {
-            document.getElementById('fileInput').click();
-        });
-        
-        document.getElementById('fileInput').addEventListener('change', (e) => {
-            if (e.target.files[0]) {
-                convertPDF(e.target.files[0]);
-            }
-        });
-        
-        async function convertPDF(file) {
-            try {
-                const arrayBuffer = await file.arrayBuffer();
-                const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
-                
-                for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-                    const page = await pdf.getPage(pageNum);
-                    const viewport = page.getViewport({ scale: 1.5 });
-                    
-                    const canvas = document.createElement('canvas');
-                    const context = canvas.getContext('2d');
-                    canvas.height = viewport.height;
-                    canvas.width = viewport.width;
-                    
-                    await page.render({
-                        canvasContext: context,
-                        viewport: viewport
-                    }).promise;
-                    
-                    const link = document.createElement('a');
-                    link.download = `page-${pageNum}.png`;
-                    link.href = canvas.toDataURL();
-                    link.click();
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error converting PDF: ' + error.message);
-            }
-        }
-    </script>
+    <script src="app.js"></script>
 </body>
 </html>
