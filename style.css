@@ -1462,3 +1462,26 @@ select.form-control {
 .mode-section.hidden {
   display: none;
 }
+
+// Initialize the app when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    // Prevent multiple initializations
+    if (window.pdfConverter) {
+        console.log('PDF Converter already initialized');
+        return;
+    }
+    
+    console.log('Initializing PDF Converter');
+    window.pdfConverter = new PDFToImageConverter();
+    
+    // Initialize PDF Editor and Combiner after a short delay to ensure DOM is ready
+    setTimeout(() => {
+        try {
+            window.pdfEditor = new PDFEditor();
+            window.pdfCombiner = new PDFCombiner();
+            console.log('PDF Editor and Combiner initialized');
+        } catch (error) {
+            console.error('Error initializing PDF Editor/Combiner:', error);
+        }
+    }, 100);
+});
